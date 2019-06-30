@@ -1,1 +1,307 @@
-<h1>Vansil</h1>
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Round About - Start Bootstrap Template</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="https://blackrockdigital.github.io/startbootstrap-round-about/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    
+    <!-- Custom styles for this template -->
+    <!--<link href="https://blackrockdigital.github.io/startbootstrap-round-about/css/round-about.css" rel="stylesheet">-->
+
+        <!--display: block;-->
+    <style>
+      .circle-col{
+        height: 280px;
+      }
+
+      .circle-col h2{
+        position: absolute;
+        bottom: 0px;
+        left: 0px;
+        width: 100%;
+      }
+
+      .circle-title {
+        font-size: 50px;
+        color: #212529;
+        font-weight: 600;
+        top: 200px;
+      }
+
+      .circle {
+        position: relative;
+        margin-left: auto;
+        margin-right: auto;
+        margin-top: 40px;
+
+        background:rgb(36, 70, 28); 
+        border-radius: 50%;
+
+        overflow: hidden;
+
+        text-align: center;
+        color: white;
+        font-size: 70px;
+      }
+
+      .size-1{
+        width: 100px; 
+        height: 100px;
+      }
+
+      .circle-sub{
+        width: 217px; 
+        height: 217px;
+        position:relative;
+        top:4px;
+        left: 4px;
+        background: rgb(32, 63, 25);
+        border-radius: 50%;
+      }
+
+      .circle-sub-sub{
+        width: 209px; 
+        height: 209px;
+        position:relative;
+        top:4px;
+        left: 4px;
+        line-height: 209px;
+        background: rgb(218, 221, 6);
+        border-radius: 50%;
+      }
+
+      .navButton{
+        width: 100px;
+        margin: 5px;
+      }
+
+      #categoryName{
+        margin-top: 40px;
+      }
+
+      a{
+        color: black;
+      }
+    </style>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+
+  <script>
+      // constant properties
+      const nCategories = 5; // sometimes hard-coded
+      const categoryNames = ["Team Size", "Programming Languages", "Commits", "Python", "Days Since Last Update"];
+      const valuesArray = [[3,  2,   2,   4,   3],
+                          [3,   3,   3,   1,   1],
+                          [279, 219, 40,  4,   27],
+                          [76.4,89.2,2.4, 0,   100],
+                          [27,  1,   121, 303, 181]];
+      const categoryPrefixes  = ['','','','',''];
+      const categorySuffixes  = ['','','','%',''];
+      const maxRadius = 150;
+      const minRadius = 40;
+      const maxFontSize = 60;
+      const minFontSize = 15;
+      const colorPositive = 'rgb(36, 70, 28)';
+      const colorNegative = 'rgb(105, 25, 23)';
+
+      var state = 0;
+      var values = valuesArray[0];
+      var prefix = categoryPrefixes[0];
+      var suffix = categorySuffixes[0];
+      
+
+      
+      
+
+      function animateCircle(selector, size, fontSize, color){
+        var lineHeight = Math.round(maxRadius / 2 - size / 2) + 'px'
+        fontSize = Math.round(fontSize) + 'px';
+        size = Math.round(size) + 'px';
+
+        $(selector).animate({
+          width: size,
+          height: size,
+          top: lineHeight,
+          'line-height': size,
+          'font-size': fontSize
+        });
+        // TODO: animate color
+        $(selector).css({
+          'background-color': color
+        })
+      }
+      
+      // maps values to radii in pixels
+      function getRadii(values, maxValue, minValue){
+        // radius = factor * value ^ power + shift, through [maxValue, maxRadius] and [minValue, minRadius]
+        const power = 1.0; // should be uneven
+
+        var factor = (minRadius - maxRadius) / (Math.pow(minValue, power) - Math.pow(maxValue, power));
+
+        var shift =  minRadius - Math.pow(minValue, power) * (minRadius - maxRadius) / (Math.pow(minValue, power) - Math.pow(maxValue, power)); // (minValue * Math.pow(maxRadius, power) - maxValue * Math.pow(minRadius, power)) / (Math.pow(maxRadius, power) - Math.pow(minRadius, power));
+
+        return values.map(function(value, key, array){
+          return factor * Math.pow(value, power) + shift;
+        });
+      }
+
+      // maps radius to font size in a circle
+      function getFontSizes(radii){
+        // fontSize = factor * radius + shift through (minFontSize, minRadius) and (maxFontSize, maxRadius)
+        var factor = (minFontSize - maxFontSize) / (minRadius - maxRadius);
+        var shift = minFontSize - minRadius * factor;
+        return radii.map(function(value, key, array){
+          return factor * value + shift;
+        })
+      }
+
+      // animate all circles to take the right size
+      function animateCircleSizes(){
+        var circleId, radii, absValues, maxValue, minValue, radius, fontSizes, fontSize, color;
+        
+        absValues = values.map(function(value, key, array){
+          return Math.abs(value);
+        });
+        maxValue = Math.max(...absValues);
+        minValue = Math.min(...absValues);
+
+        radii = getRadii(absValues, maxValue, minValue);
+        fontSizes = getFontSizes(radii);
+
+        for (i = 0; i < 5; i++){
+          circleId = "#circle" + i;
+          radius = radii[i];
+          fontSize = fontSizes[i];
+          color = (values[i] > 0) ? colorPositive : colorNegative;
+          animateCircle(circleId, radius, fontSize, color)
+        }
+      }
+
+      // write the appropriate value in each circle
+      function setCircleValues(){
+        var circleId, value;
+
+        for (i = 0; i < 5; i++){
+          circleId = "#circle" + i;
+          value = values[i];
+          $(circleId).html(prefix + value + suffix);
+        }
+      }
+
+      // this happens upon clicking left or right
+      function rightClick(){
+          state = (state + 1) % nCategories;
+          values = valuesArray[state];
+          prefix = categoryPrefixes[state];
+          suffix = categorySuffixes[state];
+      }
+      function leftClick(){
+          state = (state - 1 + nCategories) % nCategories;
+          values = valuesArray[state];
+          prefix = categoryPrefixes[state];
+          suffix = categorySuffixes[state];
+      }
+
+      // this happens upon clicking, regardless if it was left or right
+      function anyDirectionClick(){
+        animateCircleSizes();
+        $("#categoryName").text(categoryNames[state]);
+        setCircleValues();
+      }
+
+    $(document).ready(function(){
+      $("#leftButton").click(function(){
+          leftClick();
+          anyDirectionClick();
+      });
+      $("#rightButton").click(function(){
+          rightClick();
+          anyDirectionClick()
+      });
+    });
+  </script> 
+
+  </head>
+
+  <body style="background: aliceblue">
+
+    <!-- Page Content -->
+    <div class="container">
+
+      
+      <!-- Team Members Row -->
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <h3 id="categoryName">Current Category</h3>
+          <button id="leftButton" type="button" class="btn btn-dark navButton">Previous</button>
+          <button id="rightButton" type="button" class="btn btn-dark navButton">Next</button>
+        </div>
+        
+        
+
+        
+        <div class="col-lg-4 col-sm-6 col-xs-12 text-center circle-col">
+          <div id="circle0" class="circle size-1">
+
+          </div>
+          <h2 class="circle-title"><a href="https://github.com/Vansil/SMNLS">Meaning in Context</a></h2>
+        </div>
+        
+        <div class="col-lg-4 col-sm-6 col-xs-12 text-center circle-col">
+            <div id="circle1" class="circle size-1">
+              
+            </div>
+          <h2 class="circle-title">Emergent Grammar</h2>
+        </div>
+        
+        <div class="col-lg-4 col-sm-6 col-xs-12 text-center circle-col">
+            <div id="circle2" class="circle size-1">
+              
+            </div>
+          <h2 class="circle-title">Functional Sudoku</h2>
+        </div>
+        
+        <div class="col-lg-4 col-sm-6 col-xs-12 offset-lg-2 text-center circle-col">
+            <div id="circle3" class="circle size-1">
+              
+            </div>
+          <h2 class="circle-title"><a href="https://github.com/Vansil/mstai1819_EC/">Evolution</a></h2>
+        </div>
+        
+        <div class="col-lg-4 col-sm-6 col-xs-12 offset-sm-3 offset-lg-0 text-center circle-col">
+            <div id="circle4" class="circle size-1">
+              
+            </div>
+          <h2 class="circle-title"><a href="https://github.com/ozzypossie/Virtual_Nietzsche">Nietzsche</a></h2>
+        </div>
+
+
+      </div>
+    </div>
+    <!-- /.container -->
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark">
+      <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; Silvan de Boer 2019</p>
+      </div>
+      <!-- /.container -->
+    </footer>
+
+    <!-- Bootstrap core JavaScript -->
+    <script src="vendor/jquery/jquery.min.js"></script>
+    <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script>anyDirectionClick();</script>
+  </body>
+
+</html>
